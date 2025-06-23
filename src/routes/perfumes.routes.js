@@ -7,7 +7,8 @@ const router = Router();
 // Obtener todos los perfumes
 router.get('/', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM perfumes WHERE activo = 1');
+    const result = await pool.query('SELECT * FROM perfumes WHERE activo = 1');
+    const rows = result.rows;
     if (!rows || rows.length === 0) {
       return res.status(404).json({ message: 'No se encontraron perfumes' });
     }
@@ -21,7 +22,8 @@ router.get('/', async (req, res) => {
 // Obtener un perfume por ID
 router.get('/:id', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM perfumes WHERE id = ? AND activo = 1', [req.params.id]);
+    const result = await pool.query('SELECT * FROM perfumes WHERE id = $1 AND activo = 1', [req.params.id]);
+    const rows = result.rows;
     if (!rows || rows.length === 0) {
       return res.status(404).json({ message: 'Perfume no encontrado' });
     }
@@ -41,25 +43,26 @@ router.post('/', isAuthenticated, isAdmin, async (req, res) => {
     const imagen = req.file ? req.file.filename : null;
 
     // Verificar si el perfume ya existe
-    const [existingPerfume] = await pool.query('SELECT id FROM perfumes WHERE nombre = ? AND marca = ?', [nombre, marca]);
+    const existingPerfumeResult = await pool.query('SELECT id FROM perfumes WHERE nombre = $1 AND marca = $2', [nombre, marca]);
+    const existingPerfume = existingPerfumeResult.rows;
     
     if (existingPerfume && existingPerfume.length > 0) {
       return res.status(409).json({ message: 'El perfume ya existe en la base de datos' });
     }
 
     // Insertar el nuevo perfume
-    const [result] = await pool.query(
-      'INSERT INTO perfumes (nombre, marca, descripcion, precio, tipo, genero, tamano, stock, imagen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    const result = await pool.query(
+      'INSERT INTO perfumes (nombre, marca, descripcion, precio, tipo, genero, tamano, stock, imagen) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
       [nombre, marca, descripcion, precio, tipo, genero, tamano, stock, imagen]
     );
     
-    if (!result || !result.insertId) {
+    if (!result || !result.rows[0]) {
       return res.status(400).json({ message: 'Error al crear el perfume' });
     }
     
     return res.status(201).json({ 
       message: 'Perfume creado exitosamente', 
-      id: result.insertId 
+      id: result.rows[0].id 
     });
   } catch (error) {
     console.error('Error al crear perfume:', error);
@@ -80,17 +83,19 @@ router.put('/:id', isAuthenticated, isAdmin, async (req, res) => {
     }
 
     // Verificar si el perfume existe
-    const [perfumeExiste] = await pool.query('SELECT id FROM perfumes WHERE id = ?', [id]);
+    const perfumeExisteResult = await pool.query('SELECT id FROM perfumes WHERE id = $1', [id]);
+    const perfumeExiste = perfumeExisteResult.rows;
     if (!perfumeExiste || perfumeExiste.length === 0) {
       return res.status(404).json({ message: 'Perfume no encontrado' });
     }
 
     // Verificar si el nombre y marca ya existen en otro perfume
     if (nombre && marca) {
-      const [existingPerfume] = await pool.query(
-        'SELECT id FROM perfumes WHERE nombre = ? AND marca = ? AND id != ?', 
+      const existingPerfumeResult = await pool.query(
+        'SELECT id FROM perfumes WHERE nombre = $1 AND marca = $2 AND id != $3', 
         [nombre, marca, id]
       );
+      const existingPerfume = existingPerfumeResult.rows;
       
       if (existingPerfume && existingPerfume.length > 0) {
         return res.status(409).json({ message: 'Ya existe otro perfume con el mismo nombre y marca' });
@@ -98,15 +103,15 @@ router.put('/:id', isAuthenticated, isAdmin, async (req, res) => {
     }
 
     // Actualizar el perfume
-    const [result] = await pool.query(
-      'UPDATE perfumes SET nombre = IFNULL(?, nombre), marca = IFNULL(?, marca), descripcion = IFNULL(?, descripcion), ' +
-      'precio = IFNULL(?, precio), tipo = IFNULL(?, tipo), genero = IFNULL(?, genero), ' +
-      'tamano = IFNULL(?, tamano), stock = IFNULL(?, stock), imagen = IFNULL(?, imagen), ' +
-      'activo = IFNULL(?, activo) WHERE id = ?',
+    const result = await pool.query(
+      'UPDATE perfumes SET nombre = COALESCE($1, nombre), marca = COALESCE($2, marca), descripcion = COALESCE($3, descripcion), ' +
+      'precio = COALESCE($4, precio), tipo = COALESCE($5, tipo), genero = COALESCE($6, genero), ' +
+      'tamano = COALESCE($7, tamano), stock = COALESCE($8, stock), imagen = COALESCE($9, imagen), ' +
+      'activo = COALESCE($10, activo) WHERE id = $11',
       [nombre, marca, descripcion, precio, tipo, genero, tamano, stock, imagen, activo, id]
     );
     
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       return res.status(400).json({ message: 'No se pudo actualizar el perfume' });
     }
     
@@ -123,15 +128,16 @@ router.delete('/:id', isAuthenticated, isAdmin, async (req, res) => {
     const { id } = req.params;
 
     // Verificar si el perfume existe
-    const [perfumeExiste] = await pool.query('SELECT id, imagen FROM perfumes WHERE id = ?', [id]);
+    const perfumeExisteResult = await pool.query('SELECT id, imagen FROM perfumes WHERE id = $1', [id]);
+    const perfumeExiste = perfumeExisteResult.rows;
     if (!perfumeExiste || perfumeExiste.length === 0) {
       return res.status(404).json({ message: 'Perfume no encontrado' });
     }
 
     // Borrado permanente de la base de datos
-    const [result] = await pool.query('DELETE FROM perfumes WHERE id = ?', [id]);
+    const result = await pool.query('DELETE FROM perfumes WHERE id = $1', [id]);
     
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       return res.status(400).json({ message: 'No se pudo eliminar el perfume' });
     }
     

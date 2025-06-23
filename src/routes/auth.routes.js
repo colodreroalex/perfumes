@@ -14,7 +14,8 @@ router.post('/login', async (req, res) => {
     }
 
     // Buscar el administrador por email
-    const [rows] = await pool.query('SELECT * FROM administradores WHERE email = ?', [email]);
+    const result = await pool.query('SELECT * FROM administradores WHERE email = $1', [email]);
+    const rows = result.rows;
     
     if (!rows || rows.length === 0) {
       return res.status(401).json({ message: 'Credenciales inválidas' });
@@ -76,7 +77,8 @@ router.get('/verify', async (req, res) => {
     }
     
     // Buscar el administrador en la base de datos
-    const [rows] = await pool.query('SELECT id, usuario as nombre, email FROM administradores WHERE id = ?', [sessionData.id]);
+    const result = await pool.query('SELECT id, usuario as nombre, email FROM administradores WHERE id = $1', [sessionData.id]);
+    const rows = result.rows;
     
     if (!rows || rows.length === 0) {
       return res.status(401).json({ message: 'Usuario no encontrado' });

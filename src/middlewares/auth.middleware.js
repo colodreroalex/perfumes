@@ -46,7 +46,8 @@ export const isAdmin = async (req, res, next) => {
     }
 
     // Verificar si el usuario existe en la tabla de administradores
-    const [rows] = await pool.query('SELECT id FROM administradores WHERE id = ?', [req.user.id]);
+    const result = await pool.query('SELECT id FROM administradores WHERE id = $1', [req.user.id]);
+    const rows = result.rows;
     
     if (!rows || rows.length === 0) {
       return res.status(403).json({ message: 'Acceso denegado' });
