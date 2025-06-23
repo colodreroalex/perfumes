@@ -40,7 +40,7 @@ CREATE TABLE `administradores` (
 --
 
 INSERT INTO `administradores` (`id`, `usuario`, `password`, `email`, `fecha_creacion`) VALUES
-(1, 'admin', '$2a$10$JAZCT790CJMSMWRknrIhmOC2wxrHwk5e7oxduDeTjZHjR2uJqkgWe', 'admin@perfumesweb.com', '2025-06-20 12:26:46');
+(1, 'admin', 'x000138da4983', 'admin@perfumesweb.com', '2025-06-20 12:26:46');
 
 -- --------------------------------------------------------
 

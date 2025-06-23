@@ -1,54 +1,131 @@
-import express from "express";
-import { pool } from "./db.js";
-import { PORT } from "./config.js";
+import express from 'express';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { create } from 'express-handlebars';
+import multer from 'multer';
+import { PORT } from './config.js';
+import perfumesRoutes from './routes/perfumes.routes.js';
+import authRoutes from './routes/auth.routes.js';
+import { isAuthenticated, isAdmin } from './middlewares/auth.middleware.js';
 
+// Configuración de directorios
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Inicializar la aplicación
 const app = express();
-const port = 3000;
 
-//Ruta principal que muestra un mensaje de bienvenida
-app.get("/", async (req, res) => {
-  
-    const [result] = await pool.query("SELECT * FROM administradores");
-    res.json(result);
-  
-});
-
-//Ruta para obtener todos los perfumes
-app.get("/ping", async (req, res) => {
-  try {
-    const [result] = await pool.query("SELECT * FROM perfumes");
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+// Configuración de Handlebars
+const hbs = create({
+  extname: '.hbs',
+  defaultLayout: 'main',
+  layoutsDir: join(__dirname, 'views/layouts'),
+  helpers: {
+    currentYear: () => new Date().getFullYear()
   }
 });
 
-// Ruta para crear un nuevo perfume TEST
-app.get('/create', async (req, res) => {
-  try {
-    // Verificar si el perfume ya existe
-    const [existingPerfume] = await pool.query('SELECT id FROM perfumes WHERE nombre = "Blue de Channel" AND marca = "Channel"');
-    
-    if (existingPerfume && existingPerfume.length > 0) {
-      return res.status(409).json({ message: "El perfume ya existe en la base de datos" });
-    }
+app.engine('.hbs', hbs.engine);
+app.set('view engine', '.hbs');
+app.set('views', join(__dirname, 'views'));
 
-    // Si no existe, crear el nuevo perfume
-    const [result] = await pool.query('INSERT INTO perfumes (nombre, marca, descripcion, precio, tipo, genero, tamano, stock) VALUES ("Blue de Channel", "Channel", "Fragancia fresca y masculina", 120.00, "Eau de Parfum", "Masculino", "100ml", 10)');
-    
-    if (!result || !result.insertId) {
-      return res.status(400).json({ message: "Error al crear el perfume" });
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(join(__dirname, 'public')));
+
+// Configuración de multer para subida de archivos
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, join(__dirname, 'public/uploads'));
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const extension = file.originalname.split('.').pop();
+    cb(null, file.fieldname + '-' + uniqueSuffix + '.' + extension);
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten archivos de imagen'));
     }
-    
-    return res.status(201).json({ 
-      message: 'Perfume creado exitosamente', 
-      id: result.insertId 
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  }
+});
+
+// Middleware para procesar archivos en las rutas de perfumes
+app.use('/api/perfumes', (req, res, next) => {
+  if (req.method === 'POST' || req.method === 'PUT') {
+    upload.single('imagen')(req, res, function (err) {
+      if (err instanceof multer.MulterError) {
+        return res.status(400).json({ message: `Error en la subida: ${err.message}` });
+      } else if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+      next();
     });
-  } catch (error) {
-    console.error("Error en la ruta /create:", error);
-    return res.status(500).json({ message: "Error interno del servidor" });
+  } else {
+    next();
   }
 });
 
-app.listen(port);
-console.log(`Server is running on port ${port}`);
+// Rutas de la API
+app.use('/api/perfumes', perfumesRoutes);
+app.use('/api/auth', authRoutes);
+
+// Rutas de las vistas
+app.get('/', (req, res) => {
+  res.render('home', { title: 'Inicio' });
+});
+
+app.get('/contacto', (req, res) => {
+  res.render('contacto', { title: 'Contacto' });
+});
+
+// Rutas del panel de administración
+app.get('/admin', (req, res) => {
+  res.render('admin/dashboard', { 
+    title: 'Panel de Administración',
+    layout: 'main',
+    requiresAuth: true
+  });
+});
+
+app.get('/admin/perfumes', (req, res) => {
+  res.render('admin/perfumes/index', { 
+    title: 'Gestión de Perfumes',
+    layout: 'main',
+    requiresAuth: true
+  });
+});
+
+app.get('/admin/perfumes/nuevo', (req, res) => {
+  res.render('admin/perfumes/nuevo', { 
+    title: 'Nuevo Perfume',
+    layout: 'main',
+    requiresAuth: true
+  });
+});
+
+// Middleware para manejo de errores
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Error interno del servidor' });
+});
+
+// Middleware para rutas no encontradas
+app.use((req, res) => {
+  res.status(404).json({ message: 'Ruta no encontrada' });
+});
+
+// Iniciar el servidor
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});

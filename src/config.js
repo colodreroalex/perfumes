@@ -6,3 +6,6 @@ export const DB_PASSWORD = process.env.DB_PASSWORD || '';
 export const DB_NAME = process.env.DB_NAME || 'perfumes_web';
 export const DB_PORT = process.env.DB_PORT || 3306;
 
+// JWT Secret para autenticación
+export const JWT_SECRET = process.env.JWT_SECRET || 'perfumesarabesae_secret';
+

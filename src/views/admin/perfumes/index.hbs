@@ -1,0 +1,37 @@
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+  <h1 style="color: var(--accent);">Gestión de Perfumes</h1>
+  <div>
+    <a href="/admin" class="btn btn-secondary" style="margin-right: 1rem;">
+      <i class="fas fa-arrow-left"></i> Volver
+    </a>
+    <a href="/admin/perfumes/nuevo" class="btn btn-primary">
+      <i class="fas fa-plus"></i> Nuevo Perfume
+    </a>
+  </div>
+</div>
+
+<div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px var(--shadow);">
+  <div class="table-responsive">
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="border-bottom: 2px solid var(--details);">
+          <th style="padding: 1rem; text-align: left;">ID</th>
+          <th style="padding: 1rem; text-align: left;">Nombre</th>
+          <th style="padding: 1rem; text-align: left;">Marca</th>
+          <th style="padding: 1rem; text-align: left;">Precio</th>
+          <th style="padding: 1rem; text-align: left;">Stock</th>
+          <th style="padding: 1rem; text-align: left;">Estado</th>
+          <th style="padding: 1rem; text-align: center;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="perfumes-table-body">
+        <tr>
+          <td colspan="7" style="padding: 2rem; text-align: center;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: var(--accent);"></i>
+            <p style="margin-top: 1rem;">Cargando perfumes...</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}} - Perfumes Arabes AE</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo-container">
+        <div class="logo-placeholder">
+          <i class="fas fa-spray-can-sparkles"></i>
+        </div>
+        <span class="brand-name">Perfumes Arabes AE</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/contacto">Contacto</a></li>
+      </ul>
+      <div id="auth-container">
+        <div class="login-icon" id="login-button" style="display: block;">
+          <i class="fas fa-user"></i>
+        </div>
+        <div id="admin-links" style="display: none;">
+          <a href="/admin" class="admin-link">Panel Admin</a>
+          <button id="logout-button" class="btn-link">Cerrar Sesión</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div id="alert-container"></div>
+    {{{body}}}
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-logo">Perfumes Arabes AE</div>
+      <ul class="footer-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/contacto">Contacto</a></li>
+        <li id="admin-link-footer" style="display: none;"><a href="/admin">Panel Admin</a></li>
+      </ul>
+    </div>
+    <div class="footer-copyright">
+      &copy; {{currentYear}} Perfumes Arabes AE. Todos los derechos reservados.
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+  {{#if requiresAuth}}
+  <script>
+    // Verificar autenticación inmediatamente para páginas protegidas
+    (async function() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/';
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/auth/verify', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/';
+        }
+      } catch (error) {
+        console.error('Error al verificar autenticación:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+      }
+    })();
+  </script>
+  {{/if}}
+</body>
+</html>
