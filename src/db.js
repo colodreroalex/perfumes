@@ -11,8 +11,13 @@ export const pool = createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  connectTimeout: 60000, // Aumentar el tiempo de espera de conexión a 60 segundos
-  ssl: process.env.NODE_ENV === 'production' ? {rejectUnauthorized: true} : false // Habilitar SSL en producción
+//   connectTimeout: 120000, // Aumentar el tiempo de espera de conexión a 120 segundos (2 minutos)
+//   acquireTimeout: 60000, // Tiempo de espera para adquirir una conexión del pool
+  timeout: 60000, // Tiempo de espera general para las consultas
+  ssl: process.env.NODE_ENV === 'production' ? {
+    // Configuración SSL más detallada para entornos de producción
+    rejectUnauthorized: false, // Permitir conexiones sin verificación de certificado
+  } : false // Deshabilitar SSL en desarrollo
 });
 
 // Verificar la conexión a la base de datos
