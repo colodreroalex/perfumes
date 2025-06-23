@@ -10,28 +10,208 @@
   </div>
 </div>
 
-<div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px var(--shadow);">
-  <div class="table-responsive">
-    <table style="width: 100%; border-collapse: collapse;">
+<div class="admin-panel-card">
+  <div class="admin-panel-header">
+    <div class="admin-panel-title">
+      <i class="fas fa-list-alt"></i>
+      <span>Listado de Perfumes</span>
+    </div>
+    <div class="admin-panel-actions">
+      <div class="search-container">
+        <input type="text" id="search-perfumes" placeholder="Buscar perfumes..." class="search-input">
+        <i class="fas fa-search search-icon"></i>
+      </div>
+    </div>
+  </div>
+  
+  <div class="table-responsive admin-table-container">
+    <table class="admin-table">
       <thead>
-        <tr style="border-bottom: 2px solid var(--details);">
-          <th style="padding: 1rem; text-align: left;">ID</th>
-          <th style="padding: 1rem; text-align: left;">Nombre</th>
-          <th style="padding: 1rem; text-align: left;">Marca</th>
-          <th style="padding: 1rem; text-align: left;">Precio</th>
-          <th style="padding: 1rem; text-align: left;">Stock</th>
-          <th style="padding: 1rem; text-align: left;">Estado</th>
-          <th style="padding: 1rem; text-align: center;">Acciones</th>
+        <tr>
+          <th class="col-id">ID</th>
+          <th class="col-name">Perfume</th>
+          <th class="col-price">Precio</th>
+          <th class="col-stock">Stock</th>
+          <th class="col-status">Estado</th>
+          <th class="col-actions">Acciones</th>
         </tr>
       </thead>
       <tbody id="perfumes-table-body">
         <tr>
-          <td colspan="7" style="padding: 2rem; text-align: center;">
-            <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: var(--accent);"></i>
-            <p style="margin-top: 1rem;">Cargando perfumes...</p>
+          <td colspan="6" class="loading-container">
+            <div class="loading-spinner">
+              <i class="fas fa-spinner fa-spin"></i>
+              <p>Cargando perfumes...</p>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 </div>
+
+<style>
+  .admin-panel-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  
+  .admin-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    background-color: #f9f9f9;
+  }
+  
+  .admin-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  
+  .admin-panel-title i {
+    color: var(--accent);
+  }
+  
+  .admin-panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .search-container {
+    position: relative;
+  }
+  
+  .search-input {
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 50px;
+    font-size: 0.9rem;
+    width: 250px;
+    transition: all 0.3s ease;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.2);
+    width: 280px;
+  }
+  
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+  }
+  
+  .admin-table-container {
+    padding: 0.5rem 1.5rem 1.5rem;
+  }
+  
+  .admin-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  
+  .admin-table thead tr {
+    background-color: #f9f9f9;
+  }
+  
+  .admin-table th {
+    padding: 1rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 2px solid var(--details);
+    white-space: nowrap;
+  }
+  
+  .admin-table .col-id {
+    width: 60px;
+  }
+  
+  .admin-table .col-name {
+    min-width: 200px;
+  }
+  
+  .admin-table .col-price {
+    width: 100px;
+  }
+  
+  .admin-table .col-stock {
+    width: 120px;
+  }
+  
+  .admin-table .col-status {
+    width: 120px;
+  }
+  
+  .admin-table .col-actions {
+    width: 150px;
+    text-align: center;
+  }
+  
+  .loading-container {
+    padding: 3rem 0;
+  }
+  
+  .loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .loading-spinner i {
+    font-size: 2rem;
+    color: var(--accent);
+  }
+  
+  .loading-spinner p {
+    color: #888;
+    font-size: 1rem;
+  }
+  
+  @media (max-width: 992px) {
+    .search-input {
+      width: 200px;
+    }
+    
+    .search-input:focus {
+      width: 220px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .admin-panel-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .search-input, .search-input:focus {
+      width: 100%;
+    }
+    
+    .search-container {
+      width: 100%;
+    }
+    
+    .admin-table .col-id {
+      width: 40px;
+    }
+  }
+</style>

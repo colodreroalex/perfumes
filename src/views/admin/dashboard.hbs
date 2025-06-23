@@ -1,25 +1,19 @@
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-  <h1 style="color: var(--accent);">Panel de Administración</h1>
-  <button id="logout-button" class="btn btn-secondary">
-    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-  </button>
+<div class="admin-header">
+  <h1>Panel de Administración</h1>
+  <a href="/logout" class="btn btn-danger">Cerrar Sesión</a>
 </div>
 
-<div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
-  <div style="flex: 1; background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px var(--shadow);">
-    <h3 style="color: var(--accent); margin-bottom: 1rem;">Perfumes</h3>
-    <p>Gestiona el catálogo de perfumes.</p>
-    <a href="/admin/perfumes" class="btn btn-primary" style="margin-top: 1rem;">
-      <i class="fas fa-spray-can"></i> Ver Perfumes
-    </a>
+<div class="admin-cards-container">
+  <div class="admin-card">
+    <h2>Perfumes</h2>
+    <p>Gestiona todos los perfumes.</p>
+    <a href="/admin/perfumes" class="btn btn-primary admin-card-btn">Ver Perfumes</a>
   </div>
   
-  <div style="flex: 1; background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px var(--shadow);">
-    <h3 style="color: var(--accent); margin-bottom: 1rem;">Nuevo Perfume</h3>
+  <div class="admin-card">
+    <h2>Nuevo Perfume</h2>
     <p>Añade un nuevo perfume al catálogo.</p>
-    <a href="/admin/perfumes/nuevo" class="btn btn-primary" style="margin-top: 1rem;">
-      <i class="fas fa-plus"></i> Crear Perfume
-    </a>
+    <a href="/admin/perfumes/nuevo" class="btn btn-primary admin-card-btn">Crear Perfume</a>
   </div>
 </div>
 

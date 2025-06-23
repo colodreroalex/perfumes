@@ -175,46 +175,141 @@ function logout() {
 
 // Función para cargar los perfumes en la página principal
 async function loadPerfumes() {
-  const perfumesContainer = document.getElementById('perfumes-container');
-  if (!perfumesContainer) return;
+  const container = document.getElementById('perfumes-container');
+  if (!container) return;
   
   try {
     const response = await fetch('/api/perfumes');
     const perfumes = await response.json();
     
-    if (!response.ok) {
-      throw new Error('Error al cargar los perfumes');
-    }
-    
     if (perfumes.length === 0) {
-      perfumesContainer.innerHTML = '<p class="text-center">No hay perfumes disponibles en este momento.</p>';
+      container.innerHTML = `
+        <div style="text-align: center; padding: 2rem;">
+          <p>No hay perfumes disponibles en este momento.</p>
+        </div>
+      `;
       return;
     }
     
-    const perfumesHTML = perfumes.map(perfume => `
-      <div class="perfume-card">
+    // Crear el grid de perfumes
+    const perfumesGrid = document.createElement('div');
+    perfumesGrid.className = 'perfumes-grid';
+    
+    // Agregar cada perfume al grid
+    perfumes.forEach(perfume => {
+      const perfumeCard = document.createElement('div');
+      perfumeCard.className = 'perfume-card';
+      
+      perfumeCard.innerHTML = `
         <div class="perfume-image">
-          ${perfume.imagen ? 
-            `<img src="/uploads/${perfume.imagen}" alt="${perfume.nombre}">` : 
-            `<span>Sin imagen</span>`
-          }
+          <img src="${perfume.imagen ? `/uploads/${perfume.imagen}` : '/img/perfume-placeholder.jpg'}" alt="${perfume.nombre}">
         </div>
         <div class="perfume-info">
           <h3 class="perfume-name">${perfume.nombre}</h3>
           <p class="perfume-brand">${perfume.marca}</p>
-          <p class="perfume-description">${perfume.descripcion || 'Sin descripción'}</p>
-          <div class="perfume-details">
-            <span class="perfume-price">${perfume.precio}€</span>
+          <p class="perfume-description">${perfume.descripcion ? (perfume.descripcion.substring(0, 100) + (perfume.descripcion.length > 100 ? '...' : '')) : 'Sin descripción'}</p>
+          <div class="perfume-meta">
+            <span class="perfume-price">$${typeof perfume.precio === 'number' ? perfume.precio.toFixed(2) : perfume.precio}</span>
             <span class="perfume-type">${perfume.tipo}</span>
           </div>
         </div>
-      </div>
-    `).join('');
+      `;
+      
+      // Agregar evento de clic para mostrar los detalles del perfume
+      perfumeCard.addEventListener('click', () => {
+        showPerfumeDetails(perfume);
+      });
+      
+      perfumesGrid.appendChild(perfumeCard);
+    });
     
-    perfumesContainer.innerHTML = `<div class="perfumes-grid">${perfumesHTML}</div>`;
+    // Limpiar el contenedor y agregar el grid
+    container.innerHTML = '';
+    container.appendChild(perfumesGrid);
   } catch (error) {
-    perfumesContainer.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+    console.error('Error al cargar perfumes:', error);
+    container.innerHTML = `
+      <div style="text-align: center; padding: 2rem;">
+        <p>Error al cargar los perfumes. Por favor, intenta de nuevo más tarde.</p>
+      </div>
+    `;
   }
+}
+
+// Función para mostrar los detalles del perfume
+function showPerfumeDetails(perfume) {
+  // Crear el modal de detalles
+  const modalOverlay = document.createElement('div');
+  modalOverlay.className = 'perfume-detail-modal';
+  
+  // Obtener el número de WhatsApp real
+  const whatsappNumber = '34645131103';
+  const whatsappMessage = encodeURIComponent(`Hola, estoy interesado/a en el perfume ${perfume.nombre} de ${perfume.marca}. ¿Podrías darme más información?`);
+  
+  // Obtener los usuarios de Instagram reales
+  const instagramUser1 = 'alex.colodrero';
+  const instagramUser2 = 'joseosunah';
+  const email = 'perfumesarabesae@gmail.com';
+  
+  modalOverlay.innerHTML = `
+    <div class="perfume-detail-content">
+      <div class="perfume-detail-header">
+        <h2>${perfume.nombre}</h2>
+        <button class="perfume-detail-close">&times;</button>
+      </div>
+      <div class="perfume-detail-body">
+        <div class="perfume-detail-image">
+          <img src="${perfume.imagen ? `/uploads/${perfume.imagen}` : '/img/perfume-placeholder.jpg'}" alt="${perfume.nombre}">
+        </div>
+        <div class="perfume-detail-info">
+          <h3 class="perfume-detail-title">${perfume.nombre}</h3>
+          <p class="perfume-detail-brand">${perfume.marca}</p>
+          <p class="perfume-detail-description">${perfume.descripcion}</p>
+          <div class="perfume-detail-meta">
+            <div class="perfume-detail-meta-item">
+              <span class="perfume-detail-meta-label">Tipo</span>
+              <span class="perfume-detail-meta-value">${perfume.tipo}</span>
+            </div>
+            <div class="perfume-detail-meta-item">
+              <span class="perfume-detail-meta-label">Stock</span>
+              <span class="perfume-detail-meta-value">${perfume.stock} unidades</span>
+            </div>
+          </div>
+          <div class="perfume-detail-price">$${typeof perfume.precio === 'number' ? perfume.precio.toFixed(2) : perfume.precio}</div>
+          <div class="perfume-detail-actions">
+            <a href="https://wa.me/${whatsappNumber}?text=${whatsappMessage}" target="_blank" class="whatsapp-btn">
+              <i class="fab fa-whatsapp"></i> Consultar por WhatsApp
+            </a>
+            <a href="https://instagram.com/${instagramUser1}" target="_blank" class="instagram-btn">
+              <i class="fab fa-instagram"></i> @${instagramUser1}
+            </a>
+            <a href="https://instagram.com/${instagramUser2}" target="_blank" class="instagram-btn">
+              <i class="fab fa-instagram"></i> @${instagramUser2}
+            </a>
+            <a href="mailto:${email}" class="email-btn">
+              <i class="far fa-envelope"></i> Contactar por Email
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Agregar el modal al body
+  document.body.appendChild(modalOverlay);
+  
+  // Agregar evento para cerrar el modal
+  const closeButton = modalOverlay.querySelector('.perfume-detail-close');
+  closeButton.addEventListener('click', () => {
+    modalOverlay.remove();
+  });
+  
+  // Cerrar el modal al hacer clic fuera del contenido
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) {
+      modalOverlay.remove();
+    }
+  });
 }
 
 // Función para cargar los perfumes en el panel de administración
@@ -247,21 +342,290 @@ async function loadPerfumesAdmin() {
     }
     
     const perfumesHTML = perfumes.map(perfume => `
-      <tr>
-        <td>${perfume.id}</td>
-        <td>${perfume.nombre}</td>
-        <td>${perfume.marca}</td>
-        <td>${perfume.precio}€</td>
-        <td>${perfume.stock}</td>
-        <td>${perfume.activo ? 'Activo' : 'Inactivo'}</td>
-        <td>
-          <button class="btn btn-secondary btn-sm" onclick="editPerfume(${perfume.id})">Editar</button>
-          <button class="btn btn-danger btn-sm" onclick="deletePerfume(${perfume.id})">Eliminar</button>
+      <tr class="perfume-row" data-id="${perfume.id}">
+        <td class="perfume-id">#${perfume.id}</td>
+        <td class="perfume-name">
+          <div class="perfume-name-container">
+            <div class="perfume-img-small">
+              <img src="${perfume.imagen ? `/uploads/${perfume.imagen}` : '/img/perfume-placeholder.jpg'}" alt="${perfume.nombre}">
+            </div>
+            <div class="perfume-info-cell">
+              <span class="perfume-title">${perfume.nombre}</span>
+              <span class="perfume-brand">${perfume.marca}</span>
+            </div>
+          </div>
+        </td>
+        <td class="perfume-price">$${typeof perfume.precio === 'number' ? perfume.precio.toFixed(2) : perfume.precio}</td>
+        <td class="perfume-stock">
+          <div class="stock-indicator ${parseInt(perfume.stock) > 10 ? 'high-stock' : parseInt(perfume.stock) > 0 ? 'medium-stock' : 'no-stock'}">
+            <div class="stock-dot"></div>
+            <div class="stock-info">
+              <span class="stock-number">${perfume.stock}</span>
+              <span class="stock-text">${parseInt(perfume.stock) > 10 ? 'Disponible' : parseInt(perfume.stock) > 0 ? 'Limitado' : 'Agotado'}</span>
+            </div>
+          </div>
+        </td>
+        <td class="perfume-status">
+          <span class="status-badge ${perfume.activo ? 'status-active' : 'status-inactive'}">
+            <i class="fas ${perfume.activo ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+            <span>${perfume.activo ? 'Activo' : 'Inactivo'}</span>
+          </span>
+        </td>
+        <td class="action-buttons">
+          <div class="action-btn-container">
+            <button class="action-btn edit-btn" onclick="editPerfume(${perfume.id})" title="Editar perfume">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="action-btn delete-btn" onclick="deletePerfume(${perfume.id})" title="Eliminar perfume">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
         </td>
       </tr>
     `).join('');
     
     perfumesTableBody.innerHTML = perfumesHTML;
+    
+    // Agregar estilos para la tabla de perfumes en el panel de administración
+    const style = document.createElement('style');
+    style.textContent = `
+      /* Estilos para la tabla de perfumes */
+      .perfume-row {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+      }
+      
+      .perfume-row:hover {
+        background-color: rgba(212, 165, 116, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      }
+      
+      .perfume-row td {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+      }
+      
+      .perfume-id {
+        font-weight: 600;
+        color: #888;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+      }
+      
+      .perfume-name-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      
+      .perfume-img-small {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        flex-shrink: 0;
+      }
+      
+      .perfume-img-small img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      
+      .perfume-info-cell {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .perfume-title {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 4px;
+        font-size: 1rem;
+      }
+      
+      .perfume-brand {
+        font-size: 0.85rem;
+        color: var(--accent);
+        font-weight: 500;
+      }
+      
+      .perfume-price {
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 1.05rem;
+      }
+      
+      /* Indicador de stock */
+      .stock-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .stock-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      
+      .high-stock .stock-dot {
+        background-color: #4CAF50;
+        box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+      }
+      
+      .medium-stock .stock-dot {
+        background-color: #FFC107;
+        box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+      }
+      
+      .no-stock .stock-dot {
+        background-color: #F44336;
+        box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+      }
+      
+      .stock-info {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .stock-number {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--text);
+      }
+      
+      .stock-text {
+        font-size: 0.8rem;
+        color: #777;
+      }
+      
+      /* Estilos para los badges de estado */
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        min-width: 80px;
+      }
+      
+      .status-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      }
+      
+      .status-active {
+        background-color: rgba(76, 175, 80, 0.15);
+        color: #2E7D32;
+        border: 1px solid rgba(76, 175, 80, 0.3);
+      }
+      
+      .status-inactive {
+        background-color: rgba(244, 67, 54, 0.15);
+        color: #C62828;
+        border: 1px solid rgba(244, 67, 54, 0.3);
+      }
+      
+      .status-badge i {
+        font-size: 1rem;
+      }
+      
+      /* Estilos para los botones de acción */
+      .action-buttons {
+        text-align: center;
+      }
+      
+      .action-btn-container {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+      }
+      
+      .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: white;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      }
+      
+      .edit-btn {
+        background-color: #2196F3;
+      }
+      
+      .edit-btn:hover {
+        background-color: #1976D2;
+      }
+      
+      .delete-btn {
+        background-color: #F44336;
+      }
+      
+      .delete-btn:hover {
+        background-color: #D32F2F;
+      }
+      
+      /* Estilos responsivos */
+      @media (max-width: 992px) {
+        .perfume-img-small {
+          width: 40px;
+          height: 40px;
+        }
+        
+        .perfume-title {
+          font-size: 0.95rem;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .perfume-row td {
+          padding: 0.75rem 0.5rem;
+        }
+        
+        .perfume-name-container {
+          gap: 8px;
+        }
+        
+        .perfume-img-small {
+          width: 36px;
+          height: 36px;
+        }
+        
+        .status-badge {
+          padding: 4px 8px;
+          font-size: 0.8rem;
+        }
+        
+        .action-btn {
+          width: 32px;
+          height: 32px;
+          font-size: 0.8rem;
+        }
+      }
+    `;
+    
+    // Agregar el estilo al documento
+    document.head.appendChild(style);
   } catch (error) {
     const alertContainer = document.getElementById('alert-container');
     if (alertContainer) {
@@ -529,6 +893,32 @@ function updateAuthUI() {
   }
 }
 
+// Función para filtrar perfumes en la tabla de administración
+function filterPerfumes() {
+  const searchInput = document.getElementById('search-perfumes');
+  if (!searchInput) return;
+  
+  const filterValue = searchInput.value.toLowerCase();
+  const perfumeRows = document.querySelectorAll('.perfume-row');
+  
+  perfumeRows.forEach(row => {
+    const id = row.querySelector('.perfume-id').textContent.toLowerCase();
+    const name = row.querySelector('.perfume-title').textContent.toLowerCase();
+    const brand = row.querySelector('.perfume-brand').textContent.toLowerCase();
+    const price = row.querySelector('.perfume-price').textContent.toLowerCase();
+    
+    // Verificar si alguno de los campos contiene el texto de búsqueda
+    if (id.includes(filterValue) || 
+        name.includes(filterValue) || 
+        brand.includes(filterValue) || 
+        price.includes(filterValue)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
 // Inicializar la página
 document.addEventListener('DOMContentLoaded', () => {
   // Verificar autenticación para páginas de administración
@@ -545,6 +935,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Verificar si estamos en el panel de administración
   if (document.getElementById('perfumes-table-body')) {
     loadPerfumesAdmin();
+    
+    // Configurar el buscador de perfumes
+    const searchInput = document.getElementById('search-perfumes');
+    if (searchInput) {
+      searchInput.addEventListener('keyup', filterPerfumes);
+    }
   }
   
   // Verificar si existe el formulario de creación de perfumes

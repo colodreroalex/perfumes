@@ -6,8 +6,8 @@
 </div>
 
 <div class="form-container" style="max-width: 800px;">
-  <form id="perfume-form" enctype="multipart/form-data">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+  <form id="perfume-form" enctype="multipart/form-data" class="responsive-form">
+    <div class="form-row">
       <div class="form-group">
         <label for="nombre" class="form-label">Nombre</label>
         <input type="text" id="nombre" name="nombre" class="form-input" required>
@@ -21,12 +21,12 @@
     
     <div class="form-group">
       <label for="descripcion" class="form-label">Descripción</label>
-      <textarea id="descripcion" name="descripcion" class="form-textarea"></textarea>
+      <textarea id="descripcion" name="descripcion" class="form-textarea" rows="4"></textarea>
     </div>
     
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+    <div class="form-row three-columns">
       <div class="form-group">
-        <label for="precio" class="form-label">Precio (€)</label>
+        <label for="precio" class="form-label">Precio ($)</label>
         <input type="number" id="precio" name="precio" step="0.01" class="form-input" required>
       </div>
       
