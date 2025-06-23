@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header>
+  <header id="main-header">
     <nav class="navbar">
       <div class="logo-container">
         <a href="/" style="text-decoration: none; display: flex; align-items: center; gap: 1rem;">
@@ -19,17 +19,23 @@
           <span class="brand-name">Perfumes Arabes AE</span>
         </a>
       </div>
-      <ul class="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="/contacto">Contacto</a></li>
+      <div class="menu-toggle" id="menu-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="nav-overlay" id="nav-overlay"></div>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/"><i class="fas fa-home"></i> Inicio</a></li>
+        <li><a href="/contacto"><i class="fas fa-envelope"></i> Contacto</a></li>
       </ul>
       <div id="auth-container">
         <div class="login-icon" id="login-button" style="display: block;">
           <i class="fas fa-user"></i>
         </div>
         <div id="admin-links" style="display: none;">
-          <a href="/admin" class="admin-link">Panel Admin</a>
-          <button id="logout-button" class="btn-link">Cerrar Sesión</button>
+          <a href="/admin" class="admin-link"><i class="fas fa-cog"></i> Panel Admin</a>
+          <button id="logout-button" class="btn-link"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
         </div>
       </div>
     </nav>
@@ -42,14 +48,35 @@
 
   <footer>
     <div class="footer-content">
-      <div class="footer-logo">Perfumes Arabes AE</div>
-      <ul class="footer-links">
-        <li><a href="/contacto">Contacto</a></li>
-        <li id="admin-link-footer" style="display: none;"><a href="/admin">Panel Admin</a></li>
-      </ul>
+      <div class="footer-section">
+        <div class="footer-logo">Perfumes Arabes AE</div>
+        <p style="color: rgba(255,255,255,0.7); margin-top: 1rem;">Importación y distribución de los mejores perfumes árabes en España.</p>
+        <div class="footer-social">
+          <a href="https://www.instagram.com/alex.colodrero/" target="_blank"><i class="fab fa-instagram"></i></a>
+          <a href="https://www.instagram.com/joseosunah/" target="_blank"><i class="fab fa-instagram"></i></a>
+          <a href="https://wa.me/645131103" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Enlaces</h4>
+        <ul class="footer-links">
+          <li><a href="/">Inicio</a></li>
+          <li><a href="/contacto">Contacto</a></li>
+          <li id="admin-link-footer" style="display: none;"><a href="/admin">Panel Admin</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Contacto</h4>
+        <ul class="footer-links">
+          <li><a href="mailto:contacto@perfumesarabesae.com">contacto@perfumesarabesae.com</a></li>
+          <li><a href="https://wa.me/645131103">+34 645 13 11 03</a></li>
+        </ul>
+      </div>
     </div>
     <div class="footer-copyright">
-      &copy; {{currentYear}} Perfumes Arabes AE. Todos los derechos reservados. Diseñado con ♥
+      &copy; {{currentYear}} Perfumes Arabes AE. Todos los derechos reservados. Diseñado con <i class="fas fa-heart" style="color: var(--accent);"></i>
     </div>
   </footer>
 

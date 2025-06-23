@@ -23,28 +23,46 @@ function showLoginModal() {
   modalOverlay.id = 'login-modal';
 
   const modalContent = document.createElement('div');
-  modalContent.className = 'modal-content';
+  modalContent.className = 'modal-content login-modal-content';
 
   modalContent.innerHTML = `
-    <div class="modal-header">
+    <div class="modal-header login-modal-header">
+      <div class="login-icon">
+        <i class="fas fa-lock"></i>
+      </div>
       <h3 class="modal-title">Acceso Administrador</h3>
-      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <button class="modal-close" onclick="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
     <div id="login-alert-container"></div>
-    <form id="login-form">
+    <form id="login-form" class="login-form">
       <div class="form-group">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" id="email" name="email" class="form-input" required>
+        <label for="email" class="form-label">
+          <i class="fas fa-envelope"></i> Email
+        </label>
+        <input type="email" id="email" name="email" class="form-input" placeholder="Introduce tu email" required>
       </div>
       <div class="form-group">
-        <label for="password" class="form-label">Contraseña</label>
-        <input type="password" id="password" name="password" class="form-input" required>
+        <label for="password" class="form-label">
+          <i class="fas fa-key"></i> Contraseña
+        </label>
+        <div class="password-input-container">
+          <input type="password" id="password" name="password" class="form-input" placeholder="Introduce tu contraseña" required>
+          <button type="button" class="toggle-password" tabindex="-1">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
       </div>
-      <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
+      <button type="submit" class="btn btn-primary btn-block login-btn">
+        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+      </button>
     </form>
-    <p style="margin-top: 1rem; text-align: center; font-size: 0.9rem;">
-      Esta área es exclusiva para administradores.
-    </p>
+    <div class="login-footer">
+      <p>
+        <i class="fas fa-shield-alt"></i> Esta área es exclusiva para administradores.
+      </p>
+    </div>
   `;
 
   modalOverlay.appendChild(modalContent);
@@ -63,6 +81,32 @@ function showLoginModal() {
   // Manejar el envío del formulario de login
   const loginForm = document.getElementById('login-form');
   loginForm.addEventListener('submit', handleLogin);
+
+  // Añadir funcionalidad para mostrar/ocultar contraseña
+  const togglePasswordButton = document.querySelector('.toggle-password');
+  const passwordInput = document.getElementById('password');
+  
+  if (togglePasswordButton && passwordInput) {
+    togglePasswordButton.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      
+      // Cambiar el icono
+      const icon = this.querySelector('i');
+      if (type === 'password') {
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      } else {
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      }
+    });
+  }
+
+  // Añadir animación de entrada
+  setTimeout(() => {
+    modalContent.classList.add('show');
+  }, 10);
 }
 
 // Función para cerrar el modal
@@ -209,7 +253,7 @@ async function loadPerfumes() {
           <p class="perfume-brand">${perfume.marca}</p>
           <p class="perfume-description">${perfume.descripcion ? (perfume.descripcion.substring(0, 100) + (perfume.descripcion.length > 100 ? '...' : '')) : 'Sin descripción'}</p>
           <div class="perfume-meta">
-            <span class="perfume-price">$${typeof perfume.precio === 'number' ? perfume.precio.toFixed(2) : perfume.precio}</span>
+            <span class="perfume-price">€${typeof perfume.precio === 'number' ? perfume.precio.toFixed(2) : perfume.precio}</span>
             <span class="perfume-type">${perfume.tipo}</span>
           </div>
         </div>
@@ -275,7 +319,7 @@ function showPerfumeDetails(perfume) {
               <span class="perfume-detail-meta-value">${perfume.stock} unidades</span>
             </div>
           </div>
-          <div class="perfume-detail-price">$${typeof perfume.precio === 'number' ? perfume.precio.toFixed(2) : perfume.precio}</div>
+          <div class="perfume-detail-price">€${typeof perfume.precio === 'number' ? perfume.precio.toFixed(2) : perfume.precio}</div>
           <div class="perfume-detail-actions">
             <a href="https://wa.me/${whatsappNumber}?text=${whatsappMessage}" target="_blank" class="whatsapp-btn">
               <i class="fab fa-whatsapp"></i> Consultar por WhatsApp
@@ -355,7 +399,7 @@ async function loadPerfumesAdmin() {
             </div>
           </div>
         </td>
-        <td class="perfume-price">$${typeof perfume.precio === 'number' ? perfume.precio.toFixed(2) : perfume.precio}</td>
+        <td class="perfume-price">€${typeof perfume.precio === 'number' ? perfume.precio.toFixed(2) : perfume.precio}</td>
         <td class="perfume-stock">
           <div class="stock-indicator ${parseInt(perfume.stock) > 10 ? 'high-stock' : parseInt(perfume.stock) > 0 ? 'medium-stock' : 'no-stock'}">
             <div class="stock-dot"></div>
@@ -570,11 +614,11 @@ async function loadPerfumesAdmin() {
       }
       
       .edit-btn {
-        background-color: #2196F3;
+        background-color: var(--accent);
       }
       
       .edit-btn:hover {
-        background-color: #1976D2;
+        background-color: var(--accent-dark);
       }
       
       .delete-btn {
@@ -687,16 +731,23 @@ async function editPerfume(id) {
       }
     });
     
-    const perfume = await response.json();
-    
     if (!response.ok) {
       throw new Error('Error al cargar el perfume');
+    }
+    
+    const perfume = await response.json();
+    
+    // Eliminar modal existente si hay alguno
+    const existingModal = document.getElementById('edit-modal');
+    if (existingModal) {
+      existingModal.remove();
     }
     
     // Crear modal de edición
     const modalOverlay = document.createElement('div');
     modalOverlay.className = 'modal-overlay';
     modalOverlay.id = 'edit-modal';
+    modalOverlay.style.display = 'flex';
     
     const modalContent = document.createElement('div');
     modalContent.className = 'modal-content';
@@ -704,7 +755,7 @@ async function editPerfume(id) {
     modalContent.innerHTML = `
       <div class="modal-header">
         <h3 class="modal-title">Editar Perfume</h3>
-        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+        <button class="modal-close" id="close-edit-modal">&times;</button>
       </div>
       <div id="edit-alert-container"></div>
       <form id="edit-form">
@@ -745,7 +796,7 @@ async function editPerfume(id) {
         </div>
         <div class="form-group">
           <label for="tamano" class="form-label">Tamaño</label>
-          <input type="text" id="tamano" name="tamano" class="form-input" value="${perfume.tamano}">
+          <input type="text" id="tamano" name="tamano" class="form-input" value="${perfume.tamano || ''}">
         </div>
         <div class="form-group">
           <label for="stock" class="form-label">Stock</label>
@@ -780,10 +831,21 @@ async function editPerfume(id) {
       closeEditModal();
     });
     
+    // Agregar evento al botón de cerrar
+    const closeButton = document.getElementById('close-edit-modal');
+    if (closeButton) {
+      closeButton.addEventListener('click', () => {
+        closeEditModal();
+      });
+    }
+    
     // Manejar el envío del formulario de edición
     const editForm = document.getElementById('edit-form');
-    editForm.addEventListener('submit', updatePerfume);
+    if (editForm) {
+      editForm.addEventListener('submit', updatePerfume);
+    }
   } catch (error) {
+    console.error('Error en editPerfume:', error);
     showAlert(error.message, 'danger');
   }
 }
@@ -927,6 +989,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Actualizar la interfaz según el estado de autenticación
   updateAuthUI();
   
+  // Inicializar el menú móvil
+  initMobileMenu();
+  
+  // Inicializar efectos de scroll
+  initScrollEffects();
+  
   // Verificar si estamos en la página principal
   if (document.getElementById('perfumes-container')) {
     loadPerfumes();
@@ -961,3 +1029,55 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutButton.addEventListener('click', logout);
   }
 });
+
+// Función para inicializar el menú móvil
+function initMobileMenu() {
+  const menuToggle = document.getElementById('menu-toggle');
+  const navLinks = document.getElementById('nav-links');
+  const navOverlay = document.getElementById('nav-overlay');
+  
+  if (menuToggle && navLinks && navOverlay) {
+    menuToggle.addEventListener('click', function() {
+      menuToggle.classList.toggle('active');
+      navLinks.classList.toggle('active');
+      navOverlay.classList.toggle('active');
+      document.body.classList.toggle('menu-open');
+    });
+    
+    navOverlay.addEventListener('click', function() {
+      menuToggle.classList.remove('active');
+      navLinks.classList.remove('active');
+      navOverlay.classList.remove('active');
+      document.body.classList.remove('menu-open');
+    });
+    
+    // Cerrar menú al hacer clic en un enlace
+    const navItems = navLinks.querySelectorAll('a');
+    navItems.forEach(item => {
+      item.addEventListener('click', function() {
+        menuToggle.classList.remove('active');
+        navLinks.classList.remove('active');
+        navOverlay.classList.remove('active');
+        document.body.classList.remove('menu-open');
+      });
+    });
+  }
+}
+
+// Función para inicializar efectos de scroll
+function initScrollEffects() {
+  const header = document.getElementById('main-header');
+  
+  if (header) {
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+  }
+  
+  // Añadir clase al body para habilitar animaciones después de cargar la página
+  document.body.classList.add('page-loaded');
+}
