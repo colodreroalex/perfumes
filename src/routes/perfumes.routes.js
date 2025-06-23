@@ -7,7 +7,7 @@ const router = Router();
 // Obtener todos los perfumes
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM perfumes WHERE activo = 1');
+    const result = await pool.query('SELECT * FROM perfumes WHERE activo = TRUE');
     const rows = result.rows;
     if (!rows || rows.length === 0) {
       return res.status(404).json({ message: 'No se encontraron perfumes' });
@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 // Obtener un perfume por ID
 router.get('/:id', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM perfumes WHERE id = $1 AND activo = 1', [req.params.id]);
+    const result = await pool.query('SELECT * FROM perfumes WHERE id = $1 AND activo = TRUE', [req.params.id]);
     const rows = result.rows;
     if (!rows || rows.length === 0) {
       return res.status(404).json({ message: 'Perfume no encontrado' });
@@ -102,13 +102,19 @@ router.put('/:id', isAuthenticated, isAdmin, async (req, res) => {
       }
     }
 
+    // Convertir el valor de activo a booleano si está presente
+    let activoBoolean = activo;
+    if (activo !== undefined) {
+      activoBoolean = activo === true || activo === 'true' || activo === 1 || activo === '1';
+    }
+
     // Actualizar el perfume
     const result = await pool.query(
       'UPDATE perfumes SET nombre = COALESCE($1, nombre), marca = COALESCE($2, marca), descripcion = COALESCE($3, descripcion), ' +
       'precio = COALESCE($4, precio), tipo = COALESCE($5, tipo), genero = COALESCE($6, genero), ' +
       'tamano = COALESCE($7, tamano), stock = COALESCE($8, stock), imagen = COALESCE($9, imagen), ' +
       'activo = COALESCE($10, activo) WHERE id = $11',
-      [nombre, marca, descripcion, precio, tipo, genero, tamano, stock, imagen, activo, id]
+      [nombre, marca, descripcion, precio, tipo, genero, tamano, stock, imagen, activoBoolean, id]
     );
     
     if (result.rowCount === 0) {
