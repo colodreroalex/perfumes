@@ -11,6 +11,8 @@ export const pool = createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  connectTimeout: 60000, // Aumentar el tiempo de espera de conexión a 60 segundos
+  ssl: process.env.NODE_ENV === 'production' ? {rejectUnauthorized: true} : false // Habilitar SSL en producción
 });
 
 // Verificar la conexión a la base de datos
@@ -21,5 +23,6 @@ pool.getConnection()
   })
   .catch(error => {
     console.error('Error al conectar a la base de datos:', error.message);
+    console.error('Detalles adicionales del error:', error);
     console.error('Asegúrese de que el servidor MySQL esté en ejecución y que la base de datos exista.');
   });
